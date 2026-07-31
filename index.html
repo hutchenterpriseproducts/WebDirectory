@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Directory · hutch enterprise-solutions</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="data.js"></script>
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background-color: #f8fafc; background-image: radial-gradient(#cbd5e1 0.8px, transparent 0.8px); background-size: 24px 24px; min-height: 100vh; display: flex; flex-direction: column; scroll-behavior: smooth; }
+        .glass-header { position: sticky; top: 0; z-index: 50; background: rgba(255,255,255,0.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-bottom: 1px solid rgba(255,255,255,0.5); box-shadow: 0 4px 20px rgba(0,0,0,0.02); transition: all 0.3s ease; }
+        .glass-header.scrolled { background: rgba(255,255,255,0.95); box-shadow: 0 4px 20px rgba(227,82,5,0.1); }
+        ::-webkit-scrollbar { width: 8px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 20px; }
+        ::-webkit-scrollbar-thumb { background: #e35205; border-radius: 20px; border: 1px solid #ffe5d8; }
+        ::-webkit-scrollbar-thumb:hover { background: #c03e00; }
+        * { scrollbar-width: thin; scrollbar-color: #e35205 #f1f5f9; }
+        .card-entrance { animation: fadeScaleUp 0.5s cubic-bezier(0.21,1.11,0.4,1) forwards; opacity: 0; transform: scale(0.95) translateY(20px); }
+        @keyframes fadeScaleUp { 0% { opacity: 0; transform: scale(0.95) translateY(20px); } 100% { opacity: 1; transform: scale(1) translateY(0); } }
+        .business-card { transition: all 0.3s cubic-bezier(0.21,1.11,0.4,1); border: 1px solid transparent; box-shadow: 0 4px 12px rgba(0,0,0,0.04),0 1px 2px rgba(0,0,0,0.02); cursor: pointer; position: relative; overflow: hidden; }
+        .business-card::before { content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg,transparent,rgba(227,82,5,0.1),transparent); transition: left 0.5s ease; pointer-events: none; }
+        .business-card:hover::before { left: 100%; }
+        .business-card:hover { transform: translateY(-8px) scale(1.02); border-color: #e35205; box-shadow: 0 30px 35px -12px rgba(227,82,5,0.25),0 8px 15px -6px rgba(0,0,0,0.1); }
+        .business-card:active { transform: translateY(-2px) scale(0.98); }
+        .business-card:hover .bg-orange-50 { animation: pulse 1s ease infinite; }
+        @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+        .pill-item { transition: all 0.2s cubic-bezier(0.21,1.11,0.4,1); position: relative; overflow: hidden; cursor: pointer; }
+        .pill-item::after { content: ''; position: absolute; top: 50%; left: 50%; width: 0; height: 0; border-radius: 50%; background: rgba(227,82,5,0.2); transform: translate(-50%,-50%); transition: width 0.3s ease,height 0.3s ease; pointer-events: none; }
+        .pill-item:active::after { width: 200px; height: 200px; }
+        .pill-active { background-color: #e35205 !important; color: white !important; border-color: #e35205 !important; transform: scale(1.05); box-shadow: 0 4px 12px rgba(227,82,5,0.3); }
+        .scrollable-rail { -webkit-overflow-scrolling: touch; scrollbar-width: thin; mask-image: linear-gradient(90deg,transparent,black 20px,black 90%,transparent); }
+        .count-badge { background: rgba(227,82,5,0.08); color: #e35205; font-weight: 600; border: 1px solid rgba(227,82,5,0.15); transition: all 0.3s ease; }
+        .count-badge:hover { transform: scale(1.1); background: rgba(227,82,5,0.15); }
+        .content-wrapper { flex: 1 0 auto; }
+        .visit-link { position: relative; z-index: 2; transition: all 0.2s ease; }
+        .visit-link:hover { text-decoration: underline; transform: translateX(4px); }
+        .back-to-top { position: fixed; bottom: 30px; right: 30px; background: #e35205; color: white; width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; opacity: 0; visibility: hidden; transition: all 0.3s cubic-bezier(0.21,1.11,0.4,1); box-shadow: 0 4px 15px rgba(227,82,5,0.3); z-index: 100; border: 2px solid white; }
+        .back-to-top.visible { opacity: 1; visibility: visible; }
+        .back-to-top:hover { transform: scale(1.1) translateY(-5px); background: #c03e00; }
+        .back-to-top:hover svg { animation: bounce 1s ease infinite; }
+        @keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .loading-spinner { animation: spin 1s linear infinite; }
+        @keyframes slideInLeft { from { opacity: 0; transform: translateX(-30px); } to { opacity: 1; transform: translateX(0); } }
+        .stats-container { background: white; border-radius: 12px; padding: 15px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); display: flex; justify-content: space-around; flex-wrap: wrap; gap: 15px; border: 1px solid rgba(227,82,5,0.1); }
+        .stat-item { text-align: center; flex: 1; min-width: 100px; }
+        .stat-value { font-size: 24px; font-weight: bold; color: #e35205; transition: all 0.3s ease; }
+        .stat-label { font-size: 12px; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-item:hover .stat-value { transform: scale(1.1); }
+        .nav-tab { transition: all 0.3s ease; position: relative; cursor: pointer; user-select: none; }
+        .nav-tab::after { content: ''; position: absolute; bottom: -2px; left: 50%; width: 0; height: 2px; background: #e35205; transition: all 0.3s ease; transform: translateX(-50%); }
+        .nav-tab:hover::after, .nav-tab.active::after { width: 100%; }
+        .nav-tab.active { color: #e35205; font-weight: 600; background: rgba(227,82,5,0.08); }
+        .package-card { transition: all 0.3s cubic-bezier(0.21,1.11,0.4,1); border: 1px solid transparent; box-shadow: 0 4px 12px rgba(0,0,0,0.04),0 1px 2px rgba(0,0,0,0.02); }
+        .package-card:hover { transform: translateY(-5px); border-color: #e35205; box-shadow: 0 20px 30px -10px rgba(227,82,5,0.2); }
+        .package-card.featured { border: 2px solid #e35205; box-shadow: 0 10px 25px -5px rgba(227,82,5,0.15); }
+        .feature-badge { background: linear-gradient(135deg,#e35205,#ff6b35); color: white; padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
+        .domain-option { border: 2px solid #e2e8f0; border-radius: 12px; padding: 15px; cursor: pointer; transition: all 0.3s ease; position: relative; }
+        .domain-option:hover { border-color: #e35205; background: rgba(227,82,5,0.02); }
+        .domain-option.selected { border-color: #e35205; background: rgba(227,82,5,0.05); box-shadow: 0 0 0 3px rgba(227,82,5,0.1); }
+        .domain-option.selected::before { content: '✓'; position: absolute; top: 8px; right: 12px; color: #e35205; font-weight: bold; font-size: 18px; }
+        .total-price-display { background: linear-gradient(135deg,#e35205,#ff6b35); color: white; border-radius: 12px; padding: 20px; text-align: center; }
+        .price-breakdown { font-size: 14px; opacity: 0.9; margin-top: 8px; }
+        .price-amount { font-size: 36px; font-weight: bold; }
+        .domain-price-tag { display: inline-block; background: #e35205; color: white; padding: 3px 10px; border-radius: 15px; font-size: 12px; font-weight: 600; }
+        .feature-table td { padding: 8px 12px; }
+        .feature-table tr { border-bottom: 1px solid #f1f5f9; }
+        .feature-table tr:hover { background: #f8fafc; }
+        .special-feature-badge { display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg,#fef3c7,#fde68a); color: #92400e; padding: 5px 10px; border-radius: 15px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+        .highlight-feature { background: linear-gradient(135deg,#eff6ff,#dbeafe); border-left: 4px solid #3b82f6; }
+        .knowledge-card { transition: all 0.3s cubic-bezier(0.21,1.11,0.4,1); border: 1px solid #e2e8f0; }
+        .knowledge-card:hover { transform: translateY(-5px); border-color: #e35205; box-shadow: 0 20px 30px -10px rgba(227,82,5,0.15); }
+    </style>
+</head>
+<body class="antialiased text-slate-700 flex flex-col min-h-screen">
+
+    <div class="back-to-top" id="backToTop" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>
+    </div>
+
+    <header class="glass-header py-3 px-4 md:px-6" id="header">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-y-2 gap-x-4">
+            <div class="flex items-center gap-2">
+                <span class="text-2xl font-bold tracking-tight text-[#e35205]">Web<span class="text-slate-800">Directory</span></span>
+                <span class="hidden sm:inline-block bg-[#e35205]/10 text-[#e35205] text-[11px] font-semibold px-2 py-0.5 rounded-full border border-[#e35205]/20">by hutch enterprise-solutions</span>
+            </div>
+            <div class="flex items-center gap-1 bg-white/50 backdrop-blur-sm rounded-full p-1 border border-slate-200">
+                <button class="nav-tab active px-4 py-2 rounded-full text-sm font-medium" id="directoryTab"><i data-lucide="book-open" style="width:16px;height:16px;display:inline-block;margin-right:4px;"></i>Directory</button>
+                <button class="nav-tab px-4 py-2 rounded-full text-sm font-medium" id="packagesTab"><i data-lucide="package" style="width:16px;height:16px;display:inline-block;margin-right:4px;"></i>Packages</button>
+                <button class="nav-tab px-4 py-2 rounded-full text-sm font-medium" id="knowledgeTab"><i data-lucide="graduation-cap" style="width:16px;height:16px;display:inline-block;margin-right:4px;"></i>Knowledge</button>
+            </div>
+            <div class="flex-grow order-last sm:order-none mt-2 sm:mt-0 w-full sm:w-auto sm:max-w-lg" id="searchContainer">
+                <div class="relative">
+                    <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" style="width:20px;height:20px;"></i>
+                    <input type="text" id="searchInput" placeholder="Search business or sector..." class="w-full pl-10 pr-4 py-2.5 rounded-2xl border border-slate-200 bg-white/90 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-[#e35205]/40 focus:border-[#e35205] shadow-sm text-base transition-all duration-300">
+                </div>
+            </div>
+            <div class="hidden md:block w-8"></div>
+        </div>
+    </header>
+
+    <!-- Directory Page -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 md:px-6 py-6 content-wrapper" id="directoryPage">
+        <div class="stats-container">
+            <div class="stat-item"><div class="stat-value" id="totalBusinesses">0</div><div class="stat-label">Total Businesses</div></div>
+            <div class="stat-item"><div class="stat-value" id="totalCategories">0</div><div class="stat-label">Categories</div></div>
+            <div class="stat-item"><div class="stat-value" id="activeFilter">All</div><div class="stat-label">Active Filter</div></div>
+        </div>
+        <div class="relative mb-7"><div class="overflow-x-auto scrollable-rail pb-3 flex flex-nowrap gap-2" id="sectorRail"><div class="text-sm text-slate-400 px-2 py-2">Loading sectors...</div></div></div>
+        <div id="directoryGroups" class="space-y-8"><div class="text-center py-20 text-slate-400"><div class="loading-spinner inline-block mb-3"><i data-lucide="loader-2" style="width:40px;height:40px;"></i></div><p class="text-lg">Loading directory data...</p></div></div>
+    </main>
+
+    <!-- Packages Page -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 md:px-6 py-6 content-wrapper hidden" id="packagesPage">
+        <div class="text-center mb-12 card-entrance">
+            <h1 class="text-4xl font-bold text-slate-800 mb-4">Website Development Packages</h1>
+            <p class="text-lg text-slate-600 max-w-2xl mx-auto">Professional websites with .lk domain registration. All packages include Google Business Profile creation.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+            
+            <!-- Starter Package -->
+            <div class="package-card bg-white rounded-2xl p-8 card-entrance">
+                <div class="text-center mb-4">
+                    <div class="bg-green-50 p-3 rounded-xl inline-block mb-4"><i data-lucide="sprout" class="text-green-600" style="width:32px;height:32px;"></i></div>
+                    <h2 class="text-2xl font-bold text-slate-800 mb-2">Starter</h2>
+                    <p class="text-sm text-slate-500 mb-1">Single Page Website</p>
+                </div>
+                <div class="flex flex-wrap gap-1.5 mb-6 justify-center">
+                    <span class="special-feature-badge"><i data-lucide="smartphone" style="width:12px;height:12px;"></i> Mobile Responsive</span>
+                    <span class="special-feature-badge"><i data-lucide="message-circle" style="width:12px;height:12px;"></i> WhatsApp Chat</span>
+                    <span class="special-feature-badge"><i data-lucide="map-pin" style="width:12px;height:12px;"></i> Google Maps</span>
+                    <span class="special-feature-badge"><i data-lucide="image" style="width:12px;height:12px;"></i> Gallery/Portfolio</span>
+                    <span class="special-feature-badge"><i data-lucide="file-text" style="width:12px;height:12px;"></i> PDF Downloads</span>
+                    <span class="special-feature-badge"><i data-lucide="share-2" style="width:12px;height:12px;"></i> Social Links</span>
+                    <span class="special-feature-badge"><i data-lucide="search" style="width:12px;height:12px;"></i> SEO Structure</span>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-sm font-semibold text-slate-700 mb-3">Select .lk Domain</label>
+                    <div class="space-y-2">
+                        <div class="domain-option selected" onclick="selectDomain(this,'starter',5000,20000)">
+                            <div><span class="font-medium text-sm">Basic .lk Domain</span><p class="text-xs text-slate-500 mt-1">Domain Price: <span class="domain-price-tag">LKR 5,000</span></p></div>
+                            <span class="text-lg font-bold text-green-600 mt-2 block">Total: LKR 20,000</span>
+                        </div>
+                        <div class="domain-option" onclick="selectDomain(this,'starter',15000,30000)">
+                            <div><span class="font-medium text-sm">Standard .lk Domain</span><p class="text-xs text-slate-500 mt-1">Domain Price: <span class="domain-price-tag">LKR 15,000</span></p></div>
+                            <span class="text-lg font-bold text-green-600 mt-2 block">Total: LKR 30,000</span>
+                        </div>
+                        <div class="domain-option" onclick="selectDomain(this,'starter',40000,55000)">
+                            <div><span class="font-medium text-sm">Premium .lk Domain</span><p class="text-xs text-slate-500 mt-1">Domain Price: <span class="domain-price-tag">LKR 40,000</span></p></div>
+                            <span class="text-lg font-bold text-green-600 mt-2 block">Total: LKR 55,000</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="total-price-display mb-4" id="starter-total">
+                    <div class="text-sm opacity-90">Total Price</div>
+                    <div class="price-amount">LKR 20,000</div>
+                    <div class="price-breakdown">Basic .lk Domain</div>
+                </div>
+            </div>
+
+            <!-- Business Package -->
+            <div class="package-card featured bg-white rounded-2xl p-8 card-entrance relative">
+                <div class="absolute -top-4 left-1/2 transform -translate-x-1/2"><span class="feature-badge">Most Popular</span></div>
+                <div class="text-center mb-4">
+                    <div class="bg-blue-50 p-3 rounded-xl inline-block mb-4"><i data-lucide="building-2" class="text-blue-600" style="width:32px;height:32px;"></i></div>
+                    <h2 class="text-2xl font-bold text-slate-800 mb-2">Business</h2>
+                    <p class="text-sm text-slate-500 mb-1">Up to 5 Pages</p>
+                </div>
+                <div class="flex flex-wrap gap-1.5 mb-6 justify-center">
+                    <span class="special-feature-badge"><i data-lucide="smartphone" style="width:12px;height:12px;"></i> Mobile Responsive</span>
+                    <span class="special-feature-badge"><i data-lucide="message-circle" style="width:12px;height:12px;"></i> WhatsApp Order System</span>
+                    <span class="special-feature-badge"><i data-lucide="bot" style="width:12px;height:12px;"></i> Basic Chatbot</span>
+                    <span class="special-feature-badge"><i data-lucide="star" style="width:12px;height:12px;"></i> Premium Design</span>
+                    <span class="special-feature-badge"><i data-lucide="users" style="width:12px;height:12px;"></i> Testimonials</span>
+                    <span class="special-feature-badge"><i data-lucide="help-circle" style="width:12px;height:12px;"></i> FAQ Section</span>
+                    <span class="special-feature-badge"><i data-lucide="rss" style="width:12px;height:12px;"></i> Social Feed</span>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-sm font-semibold text-slate-700 mb-3">Select .lk Domain</label>
+                    <div class="space-y-2">
+                        <div class="domain-option selected" onclick="selectDomain(this,'business',5000,50000)">
+                            <div><span class="font-medium text-sm">Basic .lk Domain</span><p class="text-xs text-slate-500 mt-1">Domain Price: <span class="domain-price-tag">LKR 5,000</span></p></div>
+                            <span class="text-lg font-bold text-blue-600 mt-2 block">Total: LKR 50,000</span>
+                        </div>
+                        <div class="domain-option" onclick="selectDomain(this,'business',15000,60000)">
+                            <div><span class="font-medium text-sm">Standard .lk Domain</span><p class="text-xs text-slate-500 mt-1">Domain Price: <span class="domain-price-tag">LKR 15,000</span></p></div>
+                            <span class="text-lg font-bold text-blue-600 mt-2 block">Total: LKR 60,000</span>
+                        </div>
+                        <div class="domain-option" onclick="selectDomain(this,'business',40000,85000)">
+                            <div><span class="font-medium text-sm">Premium .lk Domain</span><p class="text-xs text-slate-500 mt-1">Domain Price: <span class="domain-price-tag">LKR 40,000</span></p></div>
+                            <span class="text-lg font-bold text-blue-600 mt-2 block">Total: LKR 85,000</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="total-price-display mb-4" id="business-total">
+                    <div class="text-sm opacity-90">Total Price</div>
+                    <div class="price-amount">LKR 50,000</div>
+                    <div class="price-breakdown">Basic .lk Domain</div>
+                </div>
+            </div>
+
+            <!-- Professional Package -->
+            <div class="package-card bg-white rounded-2xl p-8 card-entrance">
+                <div class="text-center mb-4">
+                    <div class="bg-purple-50 p-3 rounded-xl inline-block mb-4"><i data-lucide="rocket" class="text-purple-600" style="width:32px;height:32px;"></i></div>
+                    <h2 class="text-2xl font-bold text-slate-800 mb-2">Professional</h2>
+                    <p class="text-sm text-slate-500 mb-1">Up to 10 Pages</p>
+                </div>
+                <div class="flex flex-wrap gap-1.5 mb-6 justify-center">
+                    <span class="special-feature-badge"><i data-lucide="smartphone" style="width:12px;height:12px;"></i> Mobile Responsive</span>
+                    <span class="special-feature-badge"><i data-lucide="message-circle" style="width:12px;height:12px;"></i> Custom WhatsApp Forms</span>
+                    <span class="special-feature-badge"><i data-lucide="bot" style="width:12px;height:12px;"></i> Advanced Chatbot</span>
+                    <span class="special-feature-badge"><i data-lucide="search" style="width:12px;height:12px;"></i> Local SEO</span>
+                    <span class="special-feature-badge"><i data-lucide="shield" style="width:12px;height:12px;"></i> Advanced Security</span>
+                    <span class="special-feature-badge"><i data-lucide="zap" style="width:12px;height:12px;"></i> Speed Optimized</span>
+                    <span class="special-feature-badge"><i data-lucide="layout" style="width:12px;height:12px;"></i> Custom Sections</span>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-sm font-semibold text-slate-700 mb-3">Select .lk Domain</label>
+                    <div class="space-y-2">
+                        <div class="domain-option selected" onclick="selectDomain(this,'professional',5000,75000)">
+                            <div><span class="font-medium text-sm">Basic .lk Domain</span><p class="text-xs text-slate-500 mt-1">Domain Price: <span class="domain-price-tag">LKR 5,000</span></p></div>
+                            <span class="text-lg font-bold text-purple-600 mt-2 block">Total: LKR 75,000</span>
+                        </div>
+                        <div class="domain-option" onclick="selectDomain(this,'professional',15000,85000)">
+                            <div><span class="font-medium text-sm">Standard .lk Domain</span><p class="text-xs text-slate-500 mt-1">Domain Price: <span class="domain-price-tag">LKR 15,000</span></p></div>
+                            <span class="text-lg font-bold text-purple-600 mt-2 block">Total: LKR 85,000</span>
+                        </div>
+                        <div class="domain-option" onclick="selectDomain(this,'professional',40000,110000)">
+                            <div><span class="font-medium text-sm">Premium .lk Domain</span><p class="text-xs text-slate-500 mt-1">Domain Price: <span class="domain-price-tag">LKR 40,000</span></p></div>
+                            <span class="text-lg font-bold text-purple-600 mt-2 block">Total: LKR 110,000</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="total-price-display mb-4" id="professional-total">
+                    <div class="text-sm opacity-90">Total Price</div>
+                    <div class="price-amount">LKR 75,000</div>
+                    <div class="price-breakdown">Basic .lk Domain</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feature Comparison Table -->
+        <div class="bg-white rounded-2xl p-8 mb-16 overflow-x-auto card-entrance" style="animation-delay:0.2s;">
+            <h2 class="text-2xl font-bold text-slate-800 mb-6">Detailed Feature Comparison</h2>
+            <table class="w-full text-sm feature-table">
+                <thead>
+                    <tr class="border-b-2 border-slate-200 bg-slate-50">
+                        <th class="text-left py-3 px-4 font-semibold">Features</th>
+                        <th class="text-center py-3 px-4 font-semibold text-green-600">Starter</th>
+                        <th class="text-center py-3 px-4 font-semibold text-blue-600">Business</th>
+                        <th class="text-center py-3 px-4 font-semibold text-purple-600">Professional</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td class="py-3 px-4 font-medium">Number of Pages</td><td class="text-center">Single Page</td><td class="text-center">Up to 5 Pages</td><td class="text-center">Up to 10 Pages</td></tr>
+                    <tr><td class="py-3 px-4 font-medium">Mobile Responsive Design</td><td class="text-center text-green-500">✅</td><td class="text-center text-green-500">✅</td><td class="text-center text-green-500">✅</td></tr>
+                    <tr><td class="py-3 px-4 font-medium">Custom Website Design</td><td class="text-center">✅</td><td class="text-center">✅ Premium</td><td class="text-center">✅ Advanced</td></tr>
+                    <tr><td class="py-3 px-4 font-medium">Home Page</td><td class="text-center text-green-500">✅</td><td class="text-center text-green-500">✅</td><td class="text-center text-green-500">✅</td></tr>
+                    <tr><td class="py-3 px-4 font-medium">About Us Page</td><td class="text-center text-green-500">✅</td><td class="text-center text-green-500">✅</td><td class="text-center text-green-500">✅</td></tr>
+                    <tr><td class="py-3 px-4 font-medium">Services / Products Page</td><td class="text-center text-green-500">✅</td><td class="text-center text-green-500">✅</td><td class="text-center text-green-500">✅</td></tr>
+                    <tr><td class="py-3 px-4 font-medium">Contact Page</td><td class="text-center text-green-500">✅</td><td class="text-center text-green-500">✅</td><td class="text-center text-green-500">✅</td></tr>
+                    <tr><td class="py-3 px-4 font-medium">Contact Form</td><td class="text-center text-green-500">✅</td><td class="text-center text-green-500">✅</td><td class="text-center">✅ Multiple Forms</td></tr>
+                    <tr class="highlight-feature"><td class="py-3 px-4 font-medium">WhatsApp Integration</td><td class="text-center">Chat Button</td><td class="text-center">Order / Inquiry System</td><td class="text-center">Custom Order & Inquiry</td></tr>
+                    <tr class="highlight-feature"><td class="py-3 px-4 font-medium">Website Chatbot</td><td class="text-center text-red-400">❌</td><td class="text-center">✅ Basic Chatbot</td><td class="text-center">✅ Advanced Chatbot</td></tr>
+                    <tr><td class="py-3 px-4 font-medium">Google Maps Integration</td><td class="text-center text-green-500">✅</td><td class="text-center text-green-500">✅</td><td class="text-center text-green-500">✅</td></tr>
+                    <tr><td class="py-3 px-4 font-medium">Google Business Profile</td><td class="text-center text-green-500">✅</td><td class="text-center text-green-500">✅</td><td class="text-center text-green-500">✅</td></tr>
+                    <tr><td class="py-3 px-4 font-medium">Social Media Links</td><td class="text-center text-green-500">✅</td><td class="text-center text-green-500">✅</td><td class="text-center text-green-500">✅</td></tr>
+                    <tr><td class="py-3 px-4 font-medium">Gallery / Portfolio</td><td class="text-center text-green-500">✅</td><td class="text-center text-green-500">✅</td><td class="text-center text-green-500">✅</td></tr>
+                    <tr><td class="py-3 px-4 font-medium">Testimonials Section</td><td class="text-center text-red-400">❌</td><td class="text-center text-green-500">✅</td><td class="text-center text-green-500">✅</td></tr>
+                    <tr><td class="py-3 px-4 font-medium">FAQ Section</td><td class="text-center text-red-400">❌</td><td class="text-center text-green-500">✅</td><td class="text-center text-green-500">✅</td></tr>
+                    <tr><td class="py-3 px-4 font-medium">Product/Service Catalog</td><td class="text-center text-red-400">❌</td><td class="text-center text-green-500">✅</td><td class="text-center text-green-500">✅</td></tr>
+                    <tr><td class="py-3 px-4 font-medium">Team Members Section</td><td class="text-center text-red-400">❌</td><td class="text-center">✅ (If Required)</td><td class="text-center text-green-500">✅</td></tr>
+                    <tr><td class="py-3 px-4 font-medium">PDF Download Area</td><td class="text-center text-green-500">✅</td><td class="text-center text-green-500">✅</td><td class="text-center text-green-500">✅</td></tr>
+                    <tr><td class="py-3 px-4 font-medium">Social Media Feed</td><td class="text-center text-red-400">❌</td><td class="text-center text-green-500">✅</td><td class="text-center text-green-500">✅</td></tr>
+                    <tr><td class="py-3 px-4 font-medium">Customer Review Section</td><td class="text-center text-red-400">❌</td><td class="text-center text-green-500">✅</td><td class="text-center text-green-500">✅</td></tr>
+                    <tr><td class="py-3 px-4 font-medium">Lead Generation Forms</td><td class="text-center text-red-400">❌</td><td class="text-center text-green-500">✅</td><td class="text-center text-green-500">✅</td></tr>
+                    <tr><td class="py-3 px-4 font-medium">Custom Business Sections</td><td class="text-center text-red-400">❌</td><td class="text-center">Limited</td><td class="text-center">Advanced</td></tr>
+                    <tr><td class="py-3 px-4 font-medium">Google Search Console</td><td class="text-center text-red-400">❌</td><td class="text-center text-green-500">✅</td><td class="text-center text-green-500">✅</td></tr>
+                    <tr><td class="py-3 px-4 font-medium">XML Sitemap</td><td class="text-center text-red-400">❌</td><td class="text-center text-green-500">✅</td><td class="text-center text-green-500">✅</td></tr>
+                    <tr><td class="py-3 px-4 font-medium">SEO-Friendly Structure</td><td class="text-center text-green-500">✅</td><td class="text-center text-green-500">✅</td><td class="text-center text-green-500">✅</td></tr>
+                    <tr class="highlight-feature"><td class="py-3 px-4 font-medium">Local SEO Setup</td><td class="text-center text-red-400">❌</td><td class="text-center text-red-400">❌</td><td class="text-center text-green-500">✅</td></tr>
+                    <tr><td class="py-3 px-4 font-medium">Speed Optimization</td><td class="text-center">Standard</td><td class="text-center">Enhanced</td><td class="text-center">Advanced</td></tr>
+                    <tr><td class="py-3 px-4 font-medium">Security Optimization</td><td class="text-center">Standard</td><td class="text-center">Enhanced</td><td class="text-center">Advanced</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Chatbot Features -->
+        <div class="bg-white rounded-2xl p-8 mb-16 card-entrance" style="animation-delay:0.3s;">
+            <h2 class="text-2xl font-bold text-slate-800 mb-6">Chatbot Features</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="p-6 bg-blue-50 rounded-xl">
+                    <h3 class="font-bold text-lg mb-3 text-blue-700">🔵 Business Package Chatbot</h3>
+                    <ul class="space-y-2 text-sm">
+                        <li class="flex items-start gap-2"><i data-lucide="check" class="text-blue-500 flex-shrink-0 mt-0.5" style="width:16px;height:16px;"></i><span>Visitor Welcome Message</span></li>
+                        <li class="flex items-start gap-2"><i data-lucide="check" class="text-blue-500 flex-shrink-0 mt-0.5" style="width:16px;height:16px;"></i><span>Quick Reply Buttons</span></li>
+                        <li class="flex items-start gap-2"><i data-lucide="check" class="text-blue-500 flex-shrink-0 mt-0.5" style="width:16px;height:16px;"></i><span>Contact Information Assistance</span></li>
+                        <li class="flex items-start gap-2"><i data-lucide="check" class="text-blue-500 flex-shrink-0 mt-0.5" style="width:16px;height:16px;"></i><span>Business Hours Information</span></li>
+                        <li class="flex items-start gap-2"><i data-lucide="check" class="text-blue-500 flex-shrink-0 mt-0.5" style="width:16px;height:16px;"></i><span>WhatsApp Redirect</span></li>
+                    </ul>
+                </div>
+                <div class="p-6 bg-purple-50 rounded-xl">
+                    <h3 class="font-bold text-lg mb-3 text-purple-700">🟣 Professional Package Chatbot</h3>
+                    <ul class="space-y-2 text-sm">
+                        <li class="flex items-start gap-2"><i data-lucide="check" class="text-purple-500 flex-shrink-0 mt-0.5" style="width:16px;height:16px;"></i><span>Advanced Custom Chatbot</span></li>
+                        <li class="flex items-start gap-2"><i data-lucide="check" class="text-purple-500 flex-shrink-0 mt-0.5" style="width:16px;height:16px;"></i><span>Service/Product Navigation</span></li>
+                        <li class="flex items-start gap-2"><i data-lucide="check" class="text-purple-500 flex-shrink-0 mt-0.5" style="width:16px;height:16px;"></i><span>FAQ Assistance</span></li>
+                        <li class="flex items-start gap-2"><i data-lucide="check" class="text-purple-500 flex-shrink-0 mt-0.5" style="width:16px;height:16px;"></i><span>Lead Collection</span></li>
+                        <li class="flex items-start gap-2"><i data-lucide="check" class="text-purple-500 flex-shrink-0 mt-0.5" style="width:16px;height:16px;"></i><span>Multiple Quick Actions</span></li>
+                        <li class="flex items-start gap-2"><i data-lucide="check" class="text-purple-500 flex-shrink-0 mt-0.5" style="width:16px;height:16px;"></i><span>WhatsApp Integration</span></li>
+                        <li class="flex items-start gap-2"><i data-lucide="check" class="text-purple-500 flex-shrink-0 mt-0.5" style="width:16px;height:16px;"></i><span>Customized Business Responses</span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Business-Specific Features -->
+        <div class="bg-white rounded-2xl p-8 mb-16 card-entrance" style="animation-delay:0.4s;">
+            <h2 class="text-2xl font-bold text-slate-800 mb-6">Business-Specific Features</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div class="p-4 bg-orange-50 rounded-xl hover:shadow-md transition-shadow"><h3 class="font-bold text-lg mb-2">🍕 Restaurants & Pizza Shops</h3><ul class="space-y-1 text-sm text-slate-600"><li>• WhatsApp Food Ordering System</li><li>• Digital Menu Display</li><li>• PDF Menu Download</li><li>• Table Reservation Inquiry</li><li>• Customer Reviews</li></ul></div>
+                <div class="p-4 bg-orange-50 rounded-xl hover:shadow-md transition-shadow"><h3 class="font-bold text-lg mb-2">🛍️ Retail & Mobile Shops</h3><ul class="space-y-1 text-sm text-slate-600"><li>• Product Catalog</li><li>• WhatsApp Product Inquiry</li><li>• Featured Products Section</li><li>• Product Gallery</li></ul></div>
+                <div class="p-4 bg-orange-50 rounded-xl hover:shadow-md transition-shadow"><h3 class="font-bold text-lg mb-2">👗 Fashion Stores</h3><ul class="space-y-1 text-sm text-slate-600"><li>• Product Showcase</li><li>• Collection Gallery</li><li>• WhatsApp Orders</li><li>• Size Guide Section</li></ul></div>
+                <div class="p-4 bg-orange-50 rounded-xl hover:shadow-md transition-shadow"><h3 class="font-bold text-lg mb-2">🏗️ Construction Companies</h3><ul class="space-y-1 text-sm text-slate-600"><li>• Project Portfolio</li><li>• Service Showcase</li><li>• Team Section</li><li>• Company Profile Download</li></ul></div>
+                <div class="p-4 bg-orange-50 rounded-xl hover:shadow-md transition-shadow"><h3 class="font-bold text-lg mb-2">✈️ Travel Agencies</h3><ul class="space-y-1 text-sm text-slate-600"><li>• Tour Package Listings</li><li>• Package Gallery</li><li>• WhatsApp Booking Inquiry</li><li>• Tour Brochure Download</li></ul></div>
+                <div class="p-4 bg-orange-50 rounded-xl hover:shadow-md transition-shadow"><h3 class="font-bold text-lg mb-2">🎓 Educational Institutes</h3><ul class="space-y-1 text-sm text-slate-600"><li>• Course Listings</li><li>• Faculty Information</li><li>• Prospectus Download</li><li>• Student Inquiry Form</li></ul></div>
+                <div class="p-4 bg-orange-50 rounded-xl hover:shadow-md transition-shadow"><h3 class="font-bold text-lg mb-2">🏠 Real Estate Businesses</h3><ul class="space-y-1 text-sm text-slate-600"><li>• Property Listings</li><li>• Property Gallery</li><li>• Agent Profiles</li><li>• WhatsApp Property Inquiry</li></ul></div>
+                <div class="p-4 bg-orange-50 rounded-xl hover:shadow-md transition-shadow"><h3 class="font-bold text-lg mb-2">💼 Service Businesses</h3><ul class="space-y-1 text-sm text-slate-600"><li>• Service Listings</li><li>• Testimonials</li><li>• FAQ Section</li><li>• Quote Request Forms</li></ul></div>
+            </div>
+        </div>
+
+        <!-- Domain Pricing Summary -->
+        <div class="bg-white rounded-2xl p-8 mb-16 overflow-x-auto card-entrance" style="animation-delay:0.5s;">
+            <h2 class="text-2xl font-bold text-slate-800 mb-6">Domain Pricing Summary</h2>
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="border-b-2 border-slate-200 bg-slate-50">
+                        <th class="text-left py-3 px-4 font-semibold">.lk Domain Type</th>
+                        <th class="text-center py-3 px-4 font-semibold">Domain Price</th>
+                        <th class="text-center py-3 px-4 font-semibold text-green-600">Starter Total</th>
+                        <th class="text-center py-3 px-4 font-semibold text-blue-600">Business Total</th>
+                        <th class="text-center py-3 px-4 font-semibold text-purple-600">Professional Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="border-b border-slate-100 bg-green-50"><td class="py-3 px-4 font-medium">Basic .lk Domain</td><td class="text-center"><span class="domain-price-tag">LKR 5,000</span></td><td class="text-center font-bold text-green-600">LKR 20,000</td><td class="text-center font-bold text-blue-600">LKR 50,000</td><td class="text-center font-bold text-purple-600">LKR 75,000</td></tr>
+                    <tr class="border-b border-slate-100"><td class="py-3 px-4 font-medium">Standard .lk Domain</td><td class="text-center"><span class="domain-price-tag">LKR 15,000</span></td><td class="text-center font-bold text-green-600">LKR 30,000</td><td class="text-center font-bold text-blue-600">LKR 60,000</td><td class="text-center font-bold text-purple-600">LKR 85,000</td></tr>
+                    <tr><td class="py-3 px-4 font-medium">Premium .lk Domain</td><td class="text-center"><span class="domain-price-tag">LKR 40,000</span></td><td class="text-center font-bold text-green-600">LKR 55,000</td><td class="text-center font-bold text-blue-600">LKR 85,000</td><td class="text-center font-bold text-purple-600">LKR 110,000</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Included with All Packages -->
+        <div class="bg-white rounded-2xl p-8 mb-16 card-entrance" style="animation-delay:0.55s;">
+            <h2 class="text-2xl font-bold text-slate-800 mb-6">Included with All Packages</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                <div class="flex items-center gap-2 p-3 bg-green-50 rounded-lg"><i data-lucide="check-circle" class="text-green-500" style="width:18px;height:18px;"></i><span class="text-sm">Professional Design</span></div>
+                <div class="flex items-center gap-2 p-3 bg-green-50 rounded-lg"><i data-lucide="check-circle" class="text-green-500" style="width:18px;height:18px;"></i><span class="text-sm">Mobile-Friendly Layout</span></div>
+                <div class="flex items-center gap-2 p-3 bg-green-50 rounded-lg"><i data-lucide="check-circle" class="text-green-500" style="width:18px;height:18px;"></i><span class="text-sm">Fast Loading Pages</span></div>
+                <div class="flex items-center gap-2 p-3 bg-green-50 rounded-lg"><i data-lucide="check-circle" class="text-green-500" style="width:18px;height:18px;"></i><span class="text-sm">Google Maps Integration</span></div>
+                <div class="flex items-center gap-2 p-3 bg-green-50 rounded-lg"><i data-lucide="check-circle" class="text-green-500" style="width:18px;height:18px;"></i><span class="text-sm">Google Business Profile</span></div>
+                <div class="flex items-center gap-2 p-3 bg-green-50 rounded-lg"><i data-lucide="check-circle" class="text-green-500" style="width:18px;height:18px;"></i><span class="text-sm">Social Media Integration</span></div>
+                <div class="flex items-center gap-2 p-3 bg-green-50 rounded-lg"><i data-lucide="check-circle" class="text-green-500" style="width:18px;height:18px;"></i><span class="text-sm">WhatsApp Integration</span></div>
+                <div class="flex items-center gap-2 p-3 bg-green-50 rounded-lg"><i data-lucide="check-circle" class="text-green-500" style="width:18px;height:18px;"></i><span class="text-sm">Contact Forms</span></div>
+                <div class="flex items-center gap-2 p-3 bg-green-50 rounded-lg"><i data-lucide="check-circle" class="text-green-500" style="width:18px;height:18px;"></i><span class="text-sm">Technical Support</span></div>
+            </div>
+            <p class="text-xs text-slate-500 mt-4 text-center">Websites are developed using Site.pro and are optimized for business promotion, customer inquiries, lead generation, and WhatsApp-based communication.</p>
+        </div>
+    </main>
+
+    <!-- Knowledge Page -->
+    <main class="flex-1 max-w-7xl w-full mx-auto px-4 md:px-6 py-6 content-wrapper hidden" id="knowledgePage">
+        <div class="text-center mb-12 card-entrance">
+            <h1 class="text-4xl font-bold text-slate-800 mb-4">Knowledge Base</h1>
+            <p class="text-lg text-slate-600 max-w-2xl mx-auto">Helpful resources and guides for your website and domain management.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-16">
+            
+            <!-- Domain Registration - Video -->
+            <div class="knowledge-card bg-white rounded-2xl p-8 card-entrance">
+                <div class="flex items-start gap-4">
+                    <div class="bg-blue-50 p-3 rounded-xl flex-shrink-0"><i data-lucide="video" class="text-blue-600" style="width:32px;height:32px;"></i></div>
+                    <div class="flex-1">
+                        <h3 class="text-xl font-bold text-slate-800 mb-2">Domain Registration Guide</h3>
+                        <p class="text-sm text-slate-600 mb-4">Watch the video tutorial to learn how to register your .lk domain step by step.</p>
+                        <a href="https://drive.google.com/file/d/1cS-Uy-VT84Jj4lJrHqCss24MLvgvV80t/view?usp=sharing" target="_blank" class="inline-flex items-center gap-2 bg-blue-500 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-blue-600 transition-all duration-300"><i data-lucide="play" style="width:16px;height:16px;"></i> Watch Video</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Email Configuration PDF -->
+            <div class="knowledge-card bg-white rounded-2xl p-8 card-entrance">
+                <div class="flex items-start gap-4">
+                    <div class="bg-green-50 p-3 rounded-xl flex-shrink-0"><i data-lucide="mail" class="text-green-600" style="width:32px;height:32px;"></i></div>
+                    <div class="flex-1">
+                        <h3 class="text-xl font-bold text-slate-800 mb-2">Email Configuration (PDF)</h3>
+                        <p class="text-sm text-slate-600 mb-4">Step-by-step PDF guide to configure your professional email accounts.</p>
+                        <a href="https://drive.google.com/file/d/1L9nTQ07_ASo8ubRVhBaXswXHQ1_LuzWo/view?usp=sharing" target="_blank" class="inline-flex items-center gap-2 bg-green-500 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-green-600 transition-all duration-300"><i data-lucide="file-text" style="width:16px;height:16px;"></i> View PDF Guide</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Email Configuration Video -->
+            <div class="knowledge-card bg-white rounded-2xl p-8 card-entrance">
+                <div class="flex items-start gap-4">
+                    <div class="bg-red-50 p-3 rounded-xl flex-shrink-0"><i data-lucide="video" class="text-red-600" style="width:32px;height:32px;"></i></div>
+                    <div class="flex-1">
+                        <h3 class="text-xl font-bold text-slate-800 mb-2">Email Configuration (Video)</h3>
+                        <p class="text-sm text-slate-600 mb-4">Watch the video tutorial to set up your email accounts easily.</p>
+                        <a href="https://drive.google.com/file/d/1pTlpfQBXE4uOoZNlUvc7rH0x_Q7H4-oG/view?usp=sharing" target="_blank" class="inline-flex items-center gap-2 bg-red-500 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-red-600 transition-all duration-300"><i data-lucide="play" style="width:16px;height:16px;"></i> Watch Video</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Website Builder Login -->
+            <div class="knowledge-card bg-white rounded-2xl p-8 card-entrance">
+                <div class="flex items-start gap-4">
+                    <div class="bg-purple-50 p-3 rounded-xl flex-shrink-0"><i data-lucide="log-in" class="text-purple-600" style="width:32px;height:32px;"></i></div>
+                    <div class="flex-1">
+                        <h3 class="text-xl font-bold text-slate-800 mb-2">Website Builder Partner Platform</h3>
+                        <p class="text-sm text-slate-600 mb-4">Learn how to log in to the website builder partner platform with this guide.</p>
+                        <a href="https://drive.google.com/file/d/1dwksmtDC_YmY3Z-_hx_aZ6nNoWqYgkeW/view?usp=sharing" target="_blank" class="inline-flex items-center gap-2 bg-purple-500 text-white px-5 py-2.5 rounded-xl text-sm font-semibold hover:bg-purple-600 transition-all duration-300"><i data-lucide="file-text" style="width:16px;height:16px;"></i> View Guide</a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Quick Links -->
+        <div class="bg-white rounded-2xl p-8 card-entrance">
+            <h2 class="text-2xl font-bold text-slate-800 mb-6">Quick Links</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <a href="https://drive.google.com/file/d/1cS-Uy-VT84Jj4lJrHqCss24MLvgvV80t/view?usp=sharing" target="_blank" class="flex items-center gap-3 p-4 bg-blue-50 rounded-xl hover:bg-blue-100 transition-colors"><i data-lucide="video" class="text-blue-600" style="width:20px;height:20px;"></i><div><span class="text-sm font-semibold text-slate-800">Domain Registration</span><p class="text-xs text-slate-500">Video Tutorial</p></div></a>
+                <a href="https://drive.google.com/file/d/1L9nTQ07_ASo8ubRVhBaXswXHQ1_LuzWo/view?usp=sharing" target="_blank" class="flex items-center gap-3 p-4 bg-green-50 rounded-xl hover:bg-green-100 transition-colors"><i data-lucide="mail" class="text-green-600" style="width:20px;height:20px;"></i><div><span class="text-sm font-semibold text-slate-800">Email Setup (PDF)</span><p class="text-xs text-slate-500">Configuration Guide</p></div></a>
+                <a href="https://drive.google.com/file/d/1pTlpfQBXE4uOoZNlUvc7rH0x_Q7H4-oG/view?usp=sharing" target="_blank" class="flex items-center gap-3 p-4 bg-red-50 rounded-xl hover:bg-red-100 transition-colors"><i data-lucide="video" class="text-red-600" style="width:20px;height:20px;"></i><div><span class="text-sm font-semibold text-slate-800">Email Setup (Video)</span><p class="text-xs text-slate-500">Video Tutorial</p></div></a>
+                <a href="https://drive.google.com/file/d/1dwksmtDC_YmY3Z-_hx_aZ6nNoWqYgkeW/view?usp=sharing" target="_blank" class="flex items-center gap-3 p-4 bg-purple-50 rounded-xl hover:bg-purple-100 transition-colors"><i data-lucide="log-in" class="text-purple-600" style="width:20px;height:20px;"></i><div><span class="text-sm font-semibold text-slate-800">Builder Login</span><p class="text-xs text-slate-500">Partner Platform Guide</p></div></a>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-white border-t border-slate-200/70 py-8 mt-6">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <span class="text-3xl font-light tracking-wide text-[#e35205]">Web<span class="font-semibold text-slate-800">Directory</span></span>
+            <div class="text-xs text-slate-400 mt-3">© 2026 hutch enterprise-solutions</div>
+        </div>
+    </footer>
+
+    <script>
+        function selectDomain(element, pkg, domainPrice, total) {
+            element.parentElement.querySelectorAll('.domain-option').forEach(o => o.classList.remove('selected'));
+            element.classList.add('selected');
+            const names = {5000:'Basic .lk Domain',15000:'Standard .lk Domain',40000:'Premium .lk Domain'};
+            const el = document.getElementById(`${pkg}-total`);
+            el.innerHTML = `<div class="text-sm opacity-90">Total Price</div><div class="price-amount">LKR ${total.toLocaleString()}</div><div class="price-breakdown">${names[domainPrice]}</div>`;
+            el.style.transform = 'scale(1.05)';
+            setTimeout(() => el.style.transform = 'scale(1)', 200);
+        }
+
+        (function() {
+            if (typeof businessData === 'undefined') {
+                window.businessData = [
+                    {name:"Sample Business 1",url:"https://example.com",sector:"Technology"},
+                    {name:"Sample Business 2",url:"https://example.org",sector:"Retail"}
+                ];
+            }
+            
+            let all = businessData.map(i => ({name:String(i.name),url:i.url||'#',sector:String(i.sector)}));
+            let sectors = [...new Set(all.map(b=>b.sector))].sort();
+            let activeSector = null, search = '';
+            
+            document.getElementById('directoryTab').onclick = () => switchPage('directory');
+            document.getElementById('packagesTab').onclick = () => switchPage('packages');
+            document.getElementById('knowledgeTab').onclick = () => switchPage('knowledge');
+            
+            function switchPage(page) {
+                ['directory','packages','knowledge'].forEach(p => {
+                    document.getElementById(p + 'Tab').classList.toggle('active', p === page);
+                    document.getElementById(p + 'Page').classList.toggle('hidden', p !== page);
+                });
+                document.getElementById('searchContainer').classList.toggle('hidden', page !== 'directory');
+                if (page === 'directory') { updateStats(); renderPills(); renderGroups(); }
+                lucide.createIcons();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+            
+            function updateStats() {
+                document.getElementById('totalBusinesses').textContent = all.length;
+                document.getElementById('totalCategories').textContent = sectors.length;
+                document.getElementById('activeFilter').textContent = activeSector || 'All Categories';
+            }
+            updateStats();
+            
+            window.onscroll = () => {
+                const scrolled = window.scrollY > 50;
+                document.getElementById('header').classList.toggle('scrolled', scrolled);
+                document.getElementById('backToTop').classList.toggle('visible', scrolled);
+            };
+            
+            function renderPills() {
+                let h = `<button class="pill-item flex-shrink-0 px-5 py-2.5 rounded-full border border-slate-200 bg-white text-sm font-medium shadow-sm ${!activeSector?'pill-active':''}" data-sector="all">All</button>`;
+                sectors.forEach(s => h += `<button class="pill-item flex-shrink-0 px-5 py-2.5 rounded-full border border-slate-200 bg-white text-sm font-medium shadow-sm ${activeSector===s?'pill-active':''}" data-sector="${s}">${s}</button>`);
+                document.getElementById('sectorRail').innerHTML = h;
+                document.querySelectorAll('.pill-item').forEach(btn => btn.onclick = () => {
+                    activeSector = btn.dataset.sector === 'all' ? null : btn.dataset.sector;
+                    renderPills(); renderGroups(); updateStats();
+                });
+            }
+            
+            function renderGroups() {
+                let filtered = all.filter(b => (!activeSector || b.sector === activeSector) && (!search || b.name.toLowerCase().includes(search) || b.sector.toLowerCase().includes(search)));
+                const groups = {};
+                filtered.forEach(b => { if (!groups[b.sector]) groups[b.sector] = []; groups[b.sector].push(b); });
+                const sorted = Object.entries(groups).sort((a,b) => b[1].length - a[1].length).map(e => e[0]);
+                if (!sorted.length) {
+                    document.getElementById('directoryGroups').innerHTML = '<div class="text-center py-20 text-slate-400"><i data-lucide="building-2" style="width:48px;height:48px;"></i><p>No businesses found</p></div>';
+                    lucide.createIcons(); return;
+                }
+                let html = '';
+                sorted.forEach((sector, i) => {
+                    let cards = '';
+                    groups[sector].forEach((biz, j) => {
+                        let url = biz.url;
+                        if (url && !url.startsWith('http')) url = 'https://' + url;
+                        cards += `<div class="business-card bg-white rounded-2xl p-5 card-entrance" style="animation-delay:${j*0.05}s" onclick="if(!event.target.closest('.visit-link'))window.open('${url}','_blank')"><div class="flex justify-between"><div class="bg-orange-50 p-2.5 rounded-xl"><i data-lucide="globe" class="text-[#e35205]" style="width:24px;height:24px;"></i></div><span class="text-xs bg-slate-100 px-2 py-1 rounded-full">${biz.sector}</span></div><h3 class="font-bold text-lg mt-3">${biz.name}</h3><div class="text-sm text-slate-500 mt-2"><i data-lucide="map-pin" style="width:14px;height:14px;display:inline;"></i> Sri Lanka</div><div class="flex justify-between mt-5 pt-3 border-t"><a href="${url}" target="_blank" class="text-[#e35205] text-sm font-medium" onclick="event.stopPropagation()">Visit <i data-lucide="external-link" style="width:16px;height:16px;display:inline;"></i></a></div></div>`;
+                    });
+                    html += `<div style="animation:slideInLeft .5s ease ${i*0.1}s forwards;opacity:0"><div class="flex items-center gap-3 mb-3"><h2 class="text-xl font-semibold">${sector}</h2><span class="count-badge text-sm font-bold px-3 py-0.5 rounded-full">${groups[sector].length}</span></div><div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">${cards}</div></div>`;
+                });
+                document.getElementById('directoryGroups').innerHTML = html;
+                lucide.createIcons();
+            }
+            
+            let timeout;
+            document.getElementById('searchInput').oninput = e => {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => { search = e.target.value.toLowerCase(); renderGroups(); updateStats(); }, 300);
+            };
+            
+            renderPills();
+            renderGroups();
+            lucide.createIcons();
+        })();
+    </script>
+</body>
+</html>
